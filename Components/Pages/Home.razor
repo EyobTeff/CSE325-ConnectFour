@@ -1,4 +1,5 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 
 <PageTitle>Connect Four</PageTitle>
 
@@ -10,10 +11,24 @@
 		<h1>Connect Four</h1>
 	</header>
 
-	<Board @rendermode="InteractiveServer"
-	       BoardColor="Color.Black"
-	       Player1Color="Color.Green"
-	       Player2Color="Color.Purple" />
+	<div class="color-picker" role="group" aria-label="Piece color selection">
+		<label>
+			Player 1 color
+			<input type="color" value="@player1ColorHex" @oninput="OnPlayer1ColorChanged" />
+		</label>
+		<label>
+			Player 2 color
+			<input type="color" value="@player2ColorHex" @oninput="OnPlayer2ColorChanged" />
+		</label>
+		<label>
+			Board color
+			<input type="color" value="@boardColorHex" @oninput="OnBoardColorChanged" />
+		</label>
+	</div>
+
+	<Board BoardColor="ColorTranslator.FromHtml(boardColorHex)"
+	       Player1Color="ColorTranslator.FromHtml(player1ColorHex)"
+	       Player2Color="ColorTranslator.FromHtml(player2ColorHex)" />
 </main>
 
 <style>
@@ -43,4 +58,42 @@
 		font-weight: 700;
 		text-transform: uppercase;
 	}
+
+	.color-picker {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 1.5rem;
+		color: #173746;
+		font-size: 0.85rem;
+		font-weight: 600;
+	}
+
+	.color-picker label {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.35rem;
+	}
+
+	.color-picker input[type="color"] {
+		width: 3rem;
+		height: 2rem;
+		padding: 0;
+		border: 1px solid #c9d0d1;
+		border-radius: 0.35rem;
+		cursor: pointer;
+	}
 </style>
+
+@code {
+	private string player1ColorHex = "#008000";
+	private string player2ColorHex = "#800080";
+	private string boardColorHex = "#000000";
+
+	private void OnPlayer1ColorChanged(ChangeEventArgs e) => player1ColorHex = e.Value?.ToString() ?? player1ColorHex;
+
+	private void OnPlayer2ColorChanged(ChangeEventArgs e) => player2ColorHex = e.Value?.ToString() ?? player2ColorHex;
+
+	private void OnBoardColorChanged(ChangeEventArgs e) => boardColorHex = e.Value?.ToString() ?? boardColorHex;
+}

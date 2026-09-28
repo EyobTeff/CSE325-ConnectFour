@@ -1,17 +1,8 @@
 @using System.Drawing
 @inject GameState State
 
-<HeadContent>
-    <style>
-        :root {
-            --board-bg: @ColorTranslator.ToHtml(BoardColor);
-            --player1: @ColorTranslator.ToHtml(Player1Color);
-            --player2: @ColorTranslator.ToHtml(Player2Color);
-        }
-    </style>
-</HeadContent>
-
-<section class="game-panel" aria-label="Connect Four game">
+<section class="game-panel" aria-label="Connect Four game"
+          style="--board-bg: @ColorTranslator.ToHtml(BoardColor); --player1: @ColorTranslator.ToHtml(Player1Color); --player2: @ColorTranslator.ToHtml(Player2Color);">
     <div class="game-status" role="status" aria-live="polite">
         @if (!string.IsNullOrEmpty(winnerMessage))
         {
