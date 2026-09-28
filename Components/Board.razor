@@ -1,0 +1,149 @@
+@using System.Drawing
+@inject GameState State
+
+<HeadContent>
+    <style>
+        :root {
+            --board-bg: @ColorTranslator.ToHtml(BoardColor);
+            --player1: @ColorTranslator.ToHtml(Player1Color);
+            --player2: @ColorTranslator.ToHtml(Player2Color);
+        }
+    </style>
+</HeadContent>
+
+<section class="game-panel" aria-label="Connect Four game">
+    <div class="game-status" role="status" aria-live="polite">
+        @if (!string.IsNullOrEmpty(winnerMessage))
+        {
+            <strong>@winnerMessage</strong>
+        }
+        else
+        {
+            <span class="player-swatch player-@State.PlayerTurn" aria-hidden="true"></span>
+            <strong>@CurrentTurn</strong>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p class="game-error" role="alert">@errorMessage</p>
+    }
+
+    <div class="game-layout">
+        <div class="board-area">
+            <div class="column-controls" role="group" aria-label="Choose a column">
+                @for (var column = 0; column < GameState.ColumnCount; column++)
+                {
+                    var selectedColumn = column;
+                    <button type="button"
+                            class="column-button"
+                            aria-label="Drop a piece in column @(selectedColumn + 1)"
+                            disabled="@(!string.IsNullOrEmpty(winnerMessage) || State.IsColumnFull(selectedColumn))"
+                            @onclick="() => PlayPiece(selectedColumn)">
+                        <span aria-hidden="true">↓</span>
+                        <span class="column-number">@(selectedColumn + 1)</span>
+                    </button>
+                }
+            </div>
+
+            <div class="board" role="grid" aria-label="Connect Four board">
+                @for (var row = 0; row < GameState.RowCount; row++)
+                {
+                    @for (var column = 0; column < GameState.ColumnCount; column++)
+                    {
+                        var index = row * GameState.ColumnCount + column;
+                        var piece = State.TheBoard[index];
+                        <span class="container" role="gridcell" aria-label="Row @(row + 1), column @(column + 1): @PlayerName(piece)">
+                            <span class="piece @pieces[index]" aria-hidden="true"></span>
+                        </span>
+                    }
+                }
+            </div>
+        </div>
+
+        <aside class="move-history" aria-label="Move history">
+            <div class="history-heading">
+                <div>
+                    <p class="history-eyebrow">This round</p>
+                    <h2>Move history</h2>
+                </div>
+                <button type="button" class="new-game-button" @onclick="ResetGame">New game</button>
+            </div>
+
+            @if (State.MoveHistory.Count == 0)
+            {
+                <p class="empty-history">Moves will appear here.</p>
+            }
+            else
+            {
+                <ol class="move-list">
+                    @foreach (var move in State.MoveHistory)
+                    {
+                        <li>
+                            <span class="history-number">@move.Number.ToString("00")</span>
+                            <span class="player-swatch player-@move.Player" aria-hidden="true"></span>
+                            <span>Player @move.Player</span>
+                            <span class="move-column">Column @move.Column</span>
+                        </li>
+                    }
+                </ol>
+            }
+        </aside>
+    </div>
+</section>
+
+@code {
+    [Parameter]
+    public Color BoardColor { get; set; } = ColorTranslator.FromHtml("yellow");
+
+    [Parameter]
+    public Color Player1Color { get; set; } = ColorTranslator.FromHtml("red");
+
+    [Parameter]
+    public Color Player2Color { get; set; } = ColorTranslator.FromHtml("blue");
+
+    private string[] pieces = new string[42];
+    private string winnerMessage = string.Empty;
+    private string errorMessage = string.Empty;
+    private string CurrentTurn => string.IsNullOrEmpty(winnerMessage) ? $"Player {State.PlayerTurn}'s turn" : string.Empty;
+
+    protected override void OnInitialized()
+    {
+        State.ResetBoard();
+    }
+
+    private void PlayPiece(int column)
+    {
+        errorMessage = string.Empty;
+
+        try
+        {
+            var player = State.PlayerTurn;
+            var landingRow = State.PlayPiece(column);
+            var landingIndex = (landingRow - 1) * GameState.ColumnCount + column;
+            pieces[landingIndex] = $"player{player} drop{landingRow}";
+        }
+        catch (ArgumentException exception)
+        {
+            errorMessage = exception.Message;
+        }
+
+        winnerMessage = State.CheckForWin() switch
+        {
+            GameState.WinState.Player1_Wins => "Player 1 wins!",
+            GameState.WinState.Player2_Wins => "Player 2 wins!",
+            GameState.WinState.Tie => "It's a tie!",
+            _ => string.Empty
+        };
+    }
+
+    private void ResetGame()
+    {
+        State.ResetBoard();
+        winnerMessage = string.Empty;
+        errorMessage = string.Empty;
+        pieces = new string[42];
+    }
+
+    private static string PlayerName(int player) => player == 0 ? "empty" : $"Player {player}";
+}

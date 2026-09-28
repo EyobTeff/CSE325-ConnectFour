@@ -1,0 +1,46 @@
+﻿@page "/"
+
+<PageTitle>Connect Four</PageTitle>
+
+@using System.Drawing
+
+<main class="game-page">
+	<header class="game-heading">
+		<p class="eyebrow">Two players · One board</p>
+		<h1>Connect Four</h1>
+	</header>
+
+	<Board @rendermode="InteractiveServer"
+	       BoardColor="Color.Black"
+	       Player1Color="Color.Green"
+	       Player2Color="Color.Purple" />
+</main>
+
+<style>
+	.game-page {
+		display: grid;
+		justify-items: center;
+		gap: 1.5rem;
+		padding: clamp(1.5rem, 5vw, 3rem) 1rem;
+	}
+
+	.game-heading {
+		text-align: center;
+	}
+
+	.game-heading h1 {
+		margin: 0;
+		color: #173746;
+		font-family: Georgia, 'Times New Roman', serif;
+		font-size: clamp(2rem, 8vw, 3.5rem);
+		font-weight: 700;
+	}
+
+	.eyebrow {
+		margin: 0 0 0.4rem;
+		color: #b84a39;
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-transform: uppercase;
+	}
+</style>
